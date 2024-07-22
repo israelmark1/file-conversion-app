@@ -3,7 +3,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getStorage, ref } from "firebase/storage";
 
 const firebaseConfig = {
-  storageBucket: "gs://fileconversion-27a06.appspot.com",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
