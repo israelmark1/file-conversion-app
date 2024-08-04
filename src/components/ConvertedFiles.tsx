@@ -1,4 +1,3 @@
-// src/components/ConvertedFiles.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -9,13 +8,13 @@ import {
   ListResult,
   StorageReference,
 } from "firebase/storage";
-import styles from "./ConvertedFiles.module.css";
+import styles from "./styles/ConvertedFiles.module.css";
 
 const ConvertedFiles: React.FC = () => {
   const [convertedFiles, setConvertedFiles] = useState<string[]>([]);
 
   useEffect(() => {
-    const storageRef = ref(storage, "converted");
+    const storageRef = ref(storage, "convertedFiles");
     listAll(storageRef).then((result: ListResult) => {
       const filePromises = result.items.map((itemRef: StorageReference) =>
         getDownloadURL(itemRef)
