@@ -37,6 +37,7 @@ const FileUpload: React.FC = () => {
             const data = await response.json();
             if (response.ok) {
               console.log(data.message);
+              localStorage.setItem("lastUploadedFile", file.name);
             } else {
               console.error(data.error);
             }

@@ -16,26 +16,4 @@ export async function publishMessage(
   }
 }
 
-export async function subscribeToTopic(
-  subscriptionName: string,
-  callback: (message: any) => Promise<void>
-): Promise<void> {
-  try {
-    const subscription = pubsub.subscription(subscriptionName);
 
-    subscription.on("message", async (message) => {
-      try {
-        await callback(message.data.toString());
-        message.ack();
-      } catch (error) {
-        console.error("Error handling message:", error);
-        message.nack();
-      }
-    });
-
-    console.log(`Listening for messages on subscription ${subscriptionName}`);
-  } catch (error) {
-    console.error(`Error subscribing to topic ${subscriptionName}:`, error);
-    throw error;
-  }
-}
