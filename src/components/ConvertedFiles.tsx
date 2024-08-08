@@ -14,13 +14,15 @@ const ConvertedFiles: React.FC = () => {
   const [convertedFiles, setConvertedFiles] = useState<string[]>([]);
 
   useEffect(() => {
-    const storageRef = ref(storage, "convertedFiles");
-    listAll(storageRef).then((result: ListResult) => {
+    async function fetchConvertedFiles() {
+      const storageRef = ref(storage, "converted-files");
+      const result: ListResult = await listAll(storageRef);
       const filePromises = result.items.map((itemRef: StorageReference) =>
         getDownloadURL(itemRef)
       );
       Promise.all(filePromises).then((urls) => setConvertedFiles(urls));
-    });
+    }
+    fetchConvertedFiles();
   }, []);
 
   return (
