@@ -1,26 +1,46 @@
 import { PubSub } from "@google-cloud/pubsub";
 import { Server } from "ws";
+import { NextApiRequest, NextApiResponse } from "next";
 
 const pubsub = new PubSub();
-let wss; // WebSocket Server
-let activeSocket: { readyState: any; OPEN: any; send: (arg0: string) => void; } | null = null; // Store the active WebSocket connection
+let wss: Server;
+let activeSocket: import("ws") | null = null;
 
-export default function handler(req: Request, res: any) {
-  if (!res.socket.server.wss) {
-    wss = new Server({ server: res.socket.server });
-    res.socket.server.wss = wss;
+function initializeWebSocketServer(server: any) {
+  wss = new Server({ server });
 
-    wss.on("connection", (ws) => {
-      console.log("WebSocket client connected");
-      activeSocket = ws;
+  wss.on("connection", (ws) => {
+    console.log("WebSocket client connected");
+    activeSocket = ws;
 
-      ws.on("close", () => {
-        console.log("WebSocket client disconnected");
-        activeSocket = null;
-      });
+    ws.on("close", () => {
+      console.log("WebSocket client disconnected");
+      activeSocket = null;
     });
+  });
 
-    console.log("WebSocket server initialized");
+  console.log("WebSocket server initialized");
+}
+
+function handleMessage(message: any) {
+  try {
+    console.log("Received Pub/Sub message:", message.data.toString());
+
+    if (activeSocket && activeSocket.readyState === activeSocket.OPEN) {
+      activeSocket.send(message.data.toString());
+    }
+
+    message.ack();
+  } catch (error) {
+    console.error("Error handling Pub/Sub message: ", error);
+    message.nack();
+  }
+}
+
+export default function handler(req: NextApiRequest, res: any) {
+  if (!res.socket.server.wss) {
+    initializeWebSocketServer(res.socket.server);
+    res.socket.server.wss = wss;
   }
 
   res.end();
@@ -32,16 +52,5 @@ export const config = {
   },
 };
 
-// Set up Pub/Sub subscription
-const subscription = pubsub.subscription("your-subscription-name");
-
-subscription.on("message", (message) => {
-  console.log("Received Pub/Sub message:", message.data.toString());
-
-  // Notify the active WebSocket client
-  if (activeSocket && activeSocket.readyState === activeSocket.OPEN) {
-    activeSocket.send(message.data.toString());
-  }
-
-  message.ack();
-});
+const subscription = pubsub.subscription("converted-files-sub");
+subscription.on("message", handleMessage);
