@@ -1,18 +1,25 @@
 "use client";
 
-import React from "react";
-import FileUpload from "../components/FileUpload";
-import ConvertedFiles from "../components/ConvertedFiles";
-import styles from "./Home.module.css";
+import { useState } from "react";
+import Upload from "./components/Upload";
+import Download from "./components/Download";
 
-const Home: React.FC = () => {
+export default function HomePage() {
+  const [isUploaded, setIsUploaded] = useState(false);
+  const [fileName, setFileName] = useState<string | null>(null);
+
+  const handleUploadComplete = (uploadedFileName: string) => {
+    setFileName(uploadedFileName);
+    setIsUploaded(true);
+  };
+
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>File Conversion App</h1>
-      <FileUpload />
-      <ConvertedFiles />
+    <div>
+      {isUploaded && fileName ? (
+        <Download fileName={fileName} />
+      ) : (
+        <Upload onUploadComplete={handleUploadComplete} />
+      )}
     </div>
   );
-};
-
-export default Home;
+}
